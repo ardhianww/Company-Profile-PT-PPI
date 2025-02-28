@@ -5,7 +5,6 @@ Website company profile untuk PT Prima Paper Indonesia, produsen karton box berk
 
 ## Fitur
 - **Responsive Design**: Tampilan yang responsif untuk berbagai ukuran perangkat
-- **Dark Mode**: Dukungan tema gelap yang dapat diaktifkan/dinonaktifkan
 - **Blog Management**: Sistem pengelolaan artikel dengan upload gambar lokal
 - **Admin Panel**: Panel admin untuk mengelola konten website
 - **Contact Form**: Form kontak dengan penyimpanan pesan
