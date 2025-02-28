@@ -1,0 +1,5 @@
+# Atur line endings secara konsisten untuk project
+* text=auto eol=lf
+
+# Khusus untuk file Windows yang membutuhkan CRLF
+*.bat text eol=crlf 
