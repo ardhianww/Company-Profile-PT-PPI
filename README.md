@@ -43,16 +43,17 @@ Website company profile untuk PT Prima Paper Indonesia, produsen karton box berk
    - Buat file `.env` di root project
    - Tambahkan variabel environment yang diperlukan:
      ```
-     # Contoh konfigurasi
-     DATABASE_URL=http://localhost:3000/api
+     contoh:
+     DATABASE_URL=DATABASE_URL="postgresql://postgres:password@localhost:number/company-db"
+     JWTSECRET:
      ```
 4. **Setup Prisma**
    ```bash
-   npx prisma migrate -name init
+   npx prisma migrate dev
    
    npx  prisma generate
 
-   npm install prisma@client
+
    ```
 
 4. **Jalankan development server**
@@ -86,6 +87,4 @@ yarn start
 ## Kontribusi
 Silakan berkontribusi dengan membuat pull request atau melaporkan issue.
 
-## Lisensi
-[MIT License](LICENSE)
 
