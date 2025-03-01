@@ -48,11 +48,11 @@ Website company profile untuk PT Prima Paper Indonesia, produsen karton box berk
      ```
 4. **Setup Prisma**
    ```bash
-   npx prisma migrate -name init
+   npx prisma migrate dev
    
    npx  prisma generate
 
-   npm install prisma@client
+
    ```
 
 4. **Jalankan development server**
