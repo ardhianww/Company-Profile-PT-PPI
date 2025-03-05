@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { put, del } from '@vercel/blob';
 
 export async function PUT(
   request: Request,
@@ -10,18 +9,15 @@ export async function PUT(
   try {
     const formData = await request.formData();
     const id = params.id;
-    
+
     let imagePath = undefined;
     const image = formData.get('image') as File;
-    
+
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const filename = `${Date.now()}-${image.name}`;
-      const publicPath = path.join(process.cwd(), 'public', 'uploads');
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/${filename}`;
+      const blob = await put(`testimonials/${Date.now()}-${image.name}`, image, {
+        access: 'public',
+      });
+      imagePath = blob.url;
     }
 
     const updatedTestimonial = await prisma.testimonial.update({
@@ -50,9 +46,18 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.testimonial.delete({
-      where: { id: params.id }
+    const testimonial = await prisma.testimonial.findUnique({
+      where: { id: params.id },
     });
+    
+    if (testimonial?.image) {
+      await del(testimonial.image);
+    }
+
+    await prisma.testimonial.delete({
+      where: { id: params.id },
+    });
+    
     return NextResponse.json({ message: 'Testimonial deleted' });
   } catch (error) {
     return NextResponse.json(
@@ -60,4 +65,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

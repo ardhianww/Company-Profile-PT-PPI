@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import { mkdir } from 'fs/promises';
+import { put } from '@vercel/blob';
 
 export async function GET() {
   try {
@@ -23,20 +21,14 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     
-    let imagePath = '';
+    let imageUrl = '';
     const image = formData.get('image') as File;
     
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      // Ensure uploads directory exists
-      const publicPath = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(publicPath, { recursive: true });
-      
-      const filename = `${Date.now()}-${image.name}`;
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/${filename}`;
+      const blob = await put(`products/${Date.now()}-${image.name}`, image, {
+        access: 'public',
+      });
+      imageUrl = blob.url;
     }
 
     // Parse specs array properly
@@ -48,7 +40,7 @@ export async function POST(request: Request) {
         name: formData.get('name')?.toString() || '',
         description: formData.get('description')?.toString() || '',
         price: parseFloat(formData.get('price')?.toString() || '0'),
-        image: imagePath || null,
+        image: imageUrl || null,
         specs: specs,
       },
     });
@@ -61,4 +53,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

@@ -1,16 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', '127.0.0.1'],
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/uploads/**',
-      },
-    ],
+    domains: ['vrleemvx3wvysqm2.public.blob.vercel-storage.com'],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

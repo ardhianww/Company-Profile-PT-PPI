@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { put, del } from '@vercel/blob';
 
 export async function GET() {
   try {
@@ -20,18 +19,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    
-    let imagePath = '';
+    let imageUrl = null;
     const image = formData.get('image') as File;
     
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const filename = `${Date.now()}-${image.name}`;
-      const publicPath = path.join(process.cwd(), 'public', 'uploads');
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/${filename}`;
+      const blob = await put(`testimonials/${Date.now()}-${image.name}`, image, { access: 'public' });
+      imageUrl = blob.url;
     }
 
     const testimonial = await prisma.testimonial.create({
@@ -40,7 +33,7 @@ export async function POST(request: Request) {
         company: formData.get('company')?.toString() || '',
         message: formData.get('message')?.toString() || '',
         rating: parseInt(formData.get('rating')?.toString() || '5'),
-        image: imagePath || null,
+        image: imageUrl,
       },
     });
 
@@ -52,4 +45,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile, mkdir, unlink } from 'fs/promises';
-import path from 'path';
+import { put, del } from '@vercel/blob';
 
 // GET /api/blogs/[id] - Get a specific blog
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -32,27 +31,20 @@ export async function PUT(
     const image = formData.get('image') as File;
     
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      // Ensure uploads directory exists
-      const publicPath = path.join(process.cwd(), 'public', 'uploads', 'blog');
-      await mkdir(publicPath, { recursive: true });
-      
+      // Upload new image to Vercel Blob
+      const blob = await put(`blog/${Date.now()}-${image.name}`, image, {
+        access: 'public',
+      });
+
+      imagePath = blob.url;
+
       // Delete old image if exists
       const oldBlog = await prisma.blog.findUnique({ where: { id } });
       if (oldBlog?.image) {
-        const oldImagePath = path.join(process.cwd(), 'public', oldBlog.image);
-        try {
-          await unlink(oldImagePath);
-        } catch (error) {
-          console.error('Error deleting old image:', error);
-        }
+        await fetch(oldBlog.image, { method: 'DELETE' }).catch(err =>
+          console.error('Error deleting old image:', err)
+        );
       }
-      
-      const filename = `${Date.now()}-${image.name}`;
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/blog/${filename}`;
     }
 
     const updatedBlog = await prisma.blog.update({
@@ -82,17 +74,19 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Delete image file if exists
+    // Delete image from Vercel Blob if exists
     const blog = await prisma.blog.findUnique({
       where: { id: params.id }
     });
 
     if (blog?.image) {
-      const imagePath = path.join(process.cwd(), 'public', blog.image);
       try {
-        await unlink(imagePath);
-      } catch (error) {
-        console.error('Error deleting image file:', error);
+        // Extract the blob URL path
+        const blobUrl = new URL(blog.image);
+        const blobPath = blobUrl.pathname.substring(1); // Remove leading slash
+        await del(blobPath);
+      } catch (err) {
+        console.error('Error deleting image from Vercel Blob:', err);
       }
     }
 

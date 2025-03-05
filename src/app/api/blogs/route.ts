@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 export async function GET() {
   try {
@@ -25,16 +24,11 @@ export async function POST(request: Request) {
     const image = formData.get('image') as File;
     
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      // Ensure uploads directory exists
-      const publicPath = path.join(process.cwd(), 'public', 'uploads', 'blog');
-      await mkdir(publicPath, { recursive: true });
-      
-      const filename = `${Date.now()}-${image.name}`;
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/blog/${filename}`;
+      // Upload image to Vercel Blob
+      const blob = await put(`blog/${Date.now()}-${image.name}`, image, {
+        access: 'public',
+      });
+      imagePath = blob.url;
     }
 
     const blog = await prisma.blog.create({

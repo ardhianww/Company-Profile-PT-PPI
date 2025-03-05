@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
+import { del } from '@vercel/blob';
 
 export async function PUT(
   request: Request,
@@ -15,16 +15,9 @@ export async function PUT(
     const image = formData.get('image') as File;
     
     if (image && image instanceof File) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      // Ensure uploads directory exists
-      const publicPath = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(publicPath, { recursive: true });
-      
-      const filename = `${Date.now()}-${image.name}`;
-      await writeFile(path.join(publicPath, filename), buffer);
-      imagePath = `/uploads/${filename}`;
+      // Upload image to Vercel Blob
+      const blob = await put(`${Date.now()}-${image.name}`, image, { access: 'public' });
+      imagePath = blob.url; // Store URL in the database
     }
 
     // Get specs array
@@ -37,7 +30,7 @@ export async function PUT(
         description: formData.get('description')?.toString() || '',
         price: parseFloat(formData.get('price')?.toString() || '0'),
         specs: specs,
-        ...(image instanceof File ? { image: imagePath } : {}), // Only update image if new file provided
+        ...(image instanceof File ? { image: imagePath } : {}), // Only update image if a new file is provided
       },
     });
 
@@ -56,9 +49,32 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // First, get the product to access its image URL
+    const product = await prisma.product.findUnique({
+      where: { id: params.id }
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      );
+    }
+
+    // If product has an image, delete it from Vercel Blob
+    if (product.image) {
+      try {
+        await del(product.image);
+      } catch (blobError) {
+        console.error('Error deleting image from Blob storage:', blobError);
+      }
+    }
+
+    // Then delete the product from the database
     const deletedProduct = await prisma.product.delete({
       where: { id: params.id }
     });
+
     return NextResponse.json(deletedProduct);
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -67,4 +83,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

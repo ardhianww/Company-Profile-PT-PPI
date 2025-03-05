@@ -56,11 +56,16 @@ export default function TestimonialManagement() {
     try {
       const response = await fetch(`/api/testimonials/${testimonialToDelete}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to delete testimonial');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete testimonial');
+      }
 
-      router.refresh();
       await fetchTestimonials();
       setToast({
         show: true,
@@ -140,6 +145,26 @@ export default function TestimonialManagement() {
     if (e.target instanceof HTMLInputElement && e.target.type === 'file') {
       const file = e.target.files?.[0];
       if (file) {
+        // Validate file type and size
+        if (!file.type.startsWith('image/')) {
+          setToast({
+            show: true,
+            message: 'Please upload an image file',
+            type: 'error'
+          });
+          return;
+        }
+        
+        // 5MB max size
+        if (file.size > 5 * 1024 * 1024) {
+          setToast({
+            show: true,
+            message: 'Image size should be less than 5MB',
+            type: 'error'
+          });
+          return;
+        }
+
         const previewUrl = URL.createObjectURL(file);
         setImagePreview(previewUrl);
         setFormData(prev => ({
