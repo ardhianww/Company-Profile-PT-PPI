@@ -45,7 +45,6 @@ Website company profile untuk PT Prima Paper Indonesia, produsen karton box berk
      ```
      contoh:
      DATABASE_URL=DATABASE_URL="postgresql://postgres:password@localhost:number/company-db"
-     JWTSECRET:
      ```
 4. **Setup Prisma**
    ```bash
