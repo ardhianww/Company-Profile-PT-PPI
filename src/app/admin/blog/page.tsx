@@ -31,7 +31,7 @@ export default function BlogManagement() {
     updatedAt: new Date()
   });
   const [image, setImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function BlogManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    // setLoading(true);
 
     try {
       const submitData = new FormData();
@@ -91,7 +91,7 @@ export default function BlogManagement() {
         type: 'error'
       });
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -323,7 +323,7 @@ export default function BlogManagement() {
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                        </svg> 
                       </button>
                     </div>
                   )}
@@ -364,7 +364,7 @@ export default function BlogManagement() {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300">
           <div className="bg-white p-6 rounded-lg shadow-lg transform transition-all duration-300 scale-100">
-            <h3 className="text-lg font-semibold mb-4">Konfirmasi Penghapusan</h3>
+            <h3 className="text-lg text-black font-semibold mb-4">Konfirmasi Penghapusan</h3>
             <p className="text-gray-600 mb-6">Anda yakin ingin menghapus?</p>
             <div className="flex justify-end space-x-3">
               <button

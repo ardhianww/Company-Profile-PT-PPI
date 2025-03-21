@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -119,7 +120,7 @@ export default function ProductManagement() {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update product');
       }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
       const updatedProduct = await response.json();
       
       router.refresh();
@@ -315,10 +316,12 @@ export default function ProductManagement() {
                 />
                 {imagePreview && (
                   <div className="mt-2 flex items-center space-x-2">
-                    <img
+                    <Image
                       src={imagePreview}
                       alt="Preview"
-                      className="w-32 h-32 object-cover rounded"
+                      width={200}
+                      height={200}
+                      className="w-48 h-48 object-contain rounded"
                     />
                     <button
                       type="button"
@@ -330,7 +333,7 @@ export default function ProductManagement() {
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
+                      </svg> 
                     </button>
                   </div>
                 )}
@@ -366,7 +369,7 @@ export default function ProductManagement() {
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300">
             <div className="bg-white p-6 rounded-lg shadow-lg transform transition-all duration-300 scale-100">
-              <h3 className="text-lg font-semibold mb-4">Konfirmasi Penghapusan</h3>
+              <h3 className="text-lg text-black font-semibold mb-4">Konfirmasi Penghapusan</h3>
               <p className="text-gray-600 mb-6">Anda yakin ingin menghapus?</p>
               <div className="flex justify-end space-x-3">
                 <button

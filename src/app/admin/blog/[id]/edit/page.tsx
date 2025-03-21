@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-export default function EditBlogPage({ params }: { params: { id: string } }) {
+export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -13,12 +13,13 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
   });
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchBlog = async () => {
-      const response = await fetch(`/api/blogs/${params.id}`);
+      const { id } = await params; // Ambil id dari Promise
+      const response = await fetch(`/api/blogs/${id}`);
       const data = await response.json();
       setFormData({
         title: data.title,
@@ -29,13 +30,14 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
       setCurrentImage(data.image);
     };
     fetchBlog();
-  }, [params.id]);
+  }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    // setLoading(true);
 
     try {
+      const { id } = await params; // Ambil id dari Promise
       const submitData = new FormData();
       submitData.append('title', formData.title);
       submitData.append('content', formData.content);
@@ -45,7 +47,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
         submitData.append('image', newImage);
       }
 
-      const response = await fetch(`/api/blogs/${params.id}`, {
+      const response = await fetch(`/api/blogs/${id}`, {
         method: 'PUT',
         body: submitData,
       });
@@ -57,7 +59,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
     } catch (error) {
       console.error('Error:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -94,4 +96,4 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
       {/* ... rest of the form fields ... */}
     </form>
   );
-} 
+}

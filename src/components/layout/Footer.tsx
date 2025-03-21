@@ -1,5 +1,5 @@
 "use client";
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
+import Image from "next/image";
 
 interface Testimonial {
   id: string;
@@ -266,137 +267,156 @@ export default function TestimonialManagement() {
 
       {/* Modal Form */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-black">
-              {editMode ? "Edit Testimoni" : "Tambah Testimoni"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">Nama</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2 text-black"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">Perusahaan</label>
-                <input
-                  type="text"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2 text-black"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">Pesan</label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2 text-black"
-                  rows={4}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-black">Rating</label>
-                <select
-                  name="rating"
-                  value={formData.rating}
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2 text-black"
-                >
-                  {[1, 2, 3, 4, 5].map(num => (
-                    <option key={num} value={num}>{num} Bintang</option>
-                  ))}
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-black">Foto (Opsional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  name="image"
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2 text-black
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
-                />
-                {imagePreview && (
-                  <div className="mt-2 flex items-center space-x-2">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-24 h-24 object-cover rounded-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null);
-                        setFormData(prev => ({ ...prev, image: "" }));
-                      }}
-                      className="p-1 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  {editMode ? "Update" : "Simpan"}
-                </button>
-              </div>
-            </form>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md my-8">
+            <div className="max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
+              <h2 className="text-xl font-bold mb-4 text-black sticky top-0 bg-white py-2">
+                {editMode ? "Edit Testimoni" : "Tambah Testimoni"}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black">Nama</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2 text-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black">Perusahaan</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2 text-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black">Pesan</label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2 text-black"
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-black">Rating</label>
+                  <select
+                    name="rating"
+                    value={formData.rating}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2 text-black"
+                  >
+                    {[1, 2, 3, 4, 5].map(num => (
+                      <option key={num} value={num}>{num} Bintang</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1 text-black">Foto (Opsional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2 text-black file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  {imagePreview && (
+                    <div className="mt-2 flex items-center space-x-2">
+                      <Image
+                          src={imagePreview}
+                          alt="Preview"
+                          width={200}
+                          height={200}
+                          className="w-48 h-48 object-contain rounded"
+                        />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setFormData(prev => ({ ...prev, image: "" }));
+                        }}
+                        className="p-1 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg> 
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    {editMode ? "Update" : "Simpan"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300">
-          <div className="bg-white p-6 rounded-lg shadow-lg transform transition-all duration-300 scale-100">
-            <h3 className="text-lg font-semibold mb-4">Konfirmasi Penghapusan</h3>
-            <p className="text-gray-600 mb-6">Anda yakin ingin menghapus?</p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Tidak
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                Ya
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 overflow-y-auto">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full my-8">
+            <div className="max-h-[80vh] overflow-y-auto custom-scrollbar">
+              <h3 className="text-lg text-black font-semibold mb-4 sticky top-0 bg-white py-2">Konfirmasi Penghapusan</h3>
+              <p className="text-gray-600 mb-6">Anda yakin ingin menghapus?</p>
+              <div className="flex justify-end space-x-3 sticky bottom-0 bg-white py-2">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Tidak
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                  Ya
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Add custom scrollbar styles */}
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
     </div>
   );
 }

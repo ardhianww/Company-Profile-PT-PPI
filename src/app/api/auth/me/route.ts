@@ -18,6 +18,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ user: { email: admin.email } });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json({ error: "Invalid token" }, { status: 403 });
   }

@@ -1,26 +1,46 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { put } from '@vercel/blob';
-import { del } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await context.params;
+
     const formData = await request.formData();
-    const id = params.id;
-    
+    const deleteImage = formData.get('deleteImage') === 'true';
+
     let imagePath = undefined;
     const image = formData.get('image') as File;
-    
-    if (image && image instanceof File) {
-      // Upload image to Vercel Blob
-      const blob = await put(`${Date.now()}-${image.name}`, image, { access: 'public' });
-      imagePath = blob.url; // Store URL in the database
+
+    // Get the current product to handle image deletion
+    const currentProduct = await prisma.product.findUnique({ where: { id } });
+    if (!currentProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    // Get specs array
+    // Handle image deletion if requested
+    if (deleteImage && currentProduct.image) {
+      try {
+        await del(currentProduct.image);
+        imagePath = null; // Set to null to remove from database
+      } catch (error) {
+        console.error('Error deleting image from storage:', error);
+      }
+    } else if (image && image instanceof File) {
+      // Upload new image if provided
+      const blob = await put(`products/${Date.now()}-${image.name}`, image, { access: 'public' });
+      imagePath = blob.url;
+
+      // Delete old image if exists
+      if (currentProduct.image) {
+        try {
+          await del(currentProduct.image);
+        } catch (error) {
+          console.error('Error deleting old image from storage:', error);
+        }
+      }
+    }
+
     const specs = formData.getAll('specs[]').map(spec => spec.toString());
 
     const updatedProduct = await prisma.product.update({
@@ -30,38 +50,27 @@ export async function PUT(
         description: formData.get('description')?.toString() || '',
         price: parseFloat(formData.get('price')?.toString() || '0'),
         specs: specs,
-        ...(image instanceof File ? { image: imagePath } : {}), // Only update image if a new file is provided
+        ...(imagePath !== undefined ? { image: imagePath } : {}),
       },
     });
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
-    return NextResponse.json(
-      { error: 'Failed to update product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    // First, get the product to access its image URL
-    const product = await prisma.product.findUnique({
-      where: { id: params.id }
-    });
+    const { id } = await context.params; // ✅ FIX: Menggunakan await karena params adalah Promise!
+
+    const product = await prisma.product.findUnique({ where: { id } });
 
     if (!product) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    // If product has an image, delete it from Vercel Blob
     if (product.image) {
       try {
         await del(product.image);
@@ -70,17 +79,11 @@ export async function DELETE(
       }
     }
 
-    // Then delete the product from the database
-    const deletedProduct = await prisma.product.delete({
-      where: { id: params.id }
-    });
+    const deletedProduct = await prisma.product.delete({ where: { id } });
 
     return NextResponse.json(deletedProduct);
   } catch (error) {
     console.error('Error deleting product:', error);
-    return NextResponse.json(
-      { error: 'Error deleting product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error deleting product' }, { status: 500 });
   }
 }

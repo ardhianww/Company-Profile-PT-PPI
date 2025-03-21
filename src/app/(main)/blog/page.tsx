@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface Blog {
   id: number;
@@ -52,13 +53,17 @@ export default function BlogPage() {
               className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
             >
               {blog.image && (
-                <div className="relative h-56">
-                  <img 
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <Link href={`/blog/${blog.slug}`}>
+                  <div className="relative h-56">
+                    <Image
+                      src={blog.image}
+                      alt={blog.title}
+                      width={800}
+                      height={400}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </Link>
               )}
               
               <div className="p-6 flex flex-col h-full">
@@ -80,17 +85,10 @@ export default function BlogPage() {
 
                 <p className="text-gray-700 line-clamp-3 flex-grow">
                   {blog.content}
+                  
                 </p>
-
-                <Link 
-                  href={`/blog/${blog.slug}`}
-                  className="inline-flex items-center mt-4 text-primary hover:text-primary-dark font-medium"
-                >
-                  Baca Selengkapnya
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                
+                
               </div>
             </motion.article>
           ))}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import Toast from "@/components/Toast";
 
 interface Message {
   id: string;
@@ -16,6 +17,9 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' });
 
   useEffect(() => {
     fetchMessages();
@@ -33,20 +37,41 @@ export default function MessagesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this message?')) return;
+  // const handleDeleteClick = (id: string) => {
+  //   setMessageToDelete(id);
+  //   setShowDeleteModal(true);
+  // };
+
+  const handleDeleteConfirm = async () => {
+    if (!messageToDelete) return;
 
     try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/contact?id=${messageToDelete}`, { 
+        method: 'DELETE'
       });
 
-      if (response.ok) {
-        setMessages(messages.filter(message => message.id !== id));
-        setSelectedMessage(null);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete message');
       }
+
+      setMessages(messages.filter(message => message.id !== messageToDelete));
+      setSelectedMessage(null);
+      setToast({
+        show: true,
+        message: 'Pesan berhasil dihapus',
+        type: 'success'
+      });
     } catch (error) {
       console.error('Error deleting message:', error);
+      setToast({
+        show: true,
+        message: error instanceof Error ? error.message : 'Gagal menghapus pesan',
+        type: 'error'
+      });
+    } finally {
+      setShowDeleteModal(false);
+      setMessageToDelete(null);
     }
   };
 
@@ -67,6 +92,39 @@ export default function MessagesPage() {
 
   return (
     <div className="p-8">
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+            <p className="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus pesan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setMessageToDelete(null);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-2xl text-black font-bold mb-6">Pesan Contact</h1>
       <p className="text-gray-600 mb-6">Berikut adalah pesan yang telah dikirim oleh user melalui contact form.</p>
       
@@ -101,12 +159,12 @@ export default function MessagesPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-xl font-semibold text-gray-800">Message Detail</h2>
-              <button
-                onClick={() => handleDelete(selectedMessage.id)}
+              {/* <button
+                onClick={() => handleDeleteClick(selectedMessage.id)}
                 className="text-red-600 hover:text-red-800 transition-colors"
               >
                 Delete
-              </button>
+              </button> */}
             </div>
             
             <div className="space-y-4">
@@ -142,4 +200,4 @@ export default function MessagesPage() {
       </div>
     </div>
   );
-} 
+}

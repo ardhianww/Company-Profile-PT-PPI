@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface Testimonial {
   id: number;
@@ -50,9 +51,11 @@ export default function TestimonialsPage() {
               className="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 flex items-center space-x-6 max-w-3xl mx-auto"
             >
               {testimonial.image ? (
-                <img 
+                <Image 
                   src={testimonial.image} 
                   alt={testimonial.name}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (

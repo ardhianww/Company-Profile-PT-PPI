@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { put, del } from '@vercel/blob';
 
 export async function GET() {
@@ -8,6 +9,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(testimonials);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json(
       { error: 'Error fetching testimonials' },

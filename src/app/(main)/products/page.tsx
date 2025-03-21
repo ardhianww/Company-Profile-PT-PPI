@@ -10,6 +10,7 @@ interface Product {
   description: string;
   image?: string;
   specs: string[];
+  price: number;
 }
 
 export default function ProductsPage() {
@@ -59,8 +60,13 @@ export default function ProductsPage() {
                 <h3 className="text-2xl font-semibold mb-3 text-gray-900">{product.name}</h3>
                 <p className="text-gray-600 mb-4">{product.description}</p>
                 
+                <div className="mb-4">
+                  <p className="text-xl font-bold text-blue-600">
+                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price)}
+                  </p>
+                </div>
+                
                 <div className="bg-gray-100 rounded-lg p-4">
-                  {/* <h4 className="text-lg font-semibold text-gray-800 mb-2">Spesifikasi:</h4> */}
                   <ul className="space-y-1 text-sm text-gray-600">
                     {product.specs.map((spec: string, index: number) => (
                       <li key={index} className="flex items-center">{spec}</li>
